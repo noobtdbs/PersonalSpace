@@ -28,3 +28,7 @@ import connectDB from "./db/index.js";
 dotenv.config({path: './env'})
 
 connectDB()
+.then(process.env.PORT || 8000, ()=>{
+    app.listen(`Server is running at PORT: ${process.env.PORT}`)
+})
+.catch((e)=>console.log("DB Connection Failed",e))
