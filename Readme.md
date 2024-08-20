@@ -25,8 +25,8 @@ then to allow all types of encoded urls we use app.use(express.urlencoded({exten
 to save any files we want in the server itself we use app.use(express.static("public")) \
 to read and modify the data present in the cookies in the client we use the cookie-parser middleware app.use(cookieParser())
 
--[MiddleWare Concept]![alt text](image.png)
--[Status Codes]![alt text](image-1.png)
+-[MiddleWare Concept]![alt text](public/temp/image.png)
+-[Status Codes]![alt text](public/temp/image-1.png)
 
 ### Why we use Middlewares?
 
@@ -61,6 +61,38 @@ checks the localfilepath and accordingly we save it to the clodinary server and 
 Multer is basically used as a middleware to check if a file is stored in the localserver or not and we genrally write the multer section code in
 the middleware folder. Then we take the diskstorage function of multer and stores the destination folder where we want the files to be stored 
 locally and then we set the file name and then we return the function.
+
+
+
+### export vs export default
+
+if we only write export then while importing we can not change its name \
+but in case of export default we can set the import function name as we wish.
+
+### how to write controllers
+
+first go to the controller and create a file and import the middleware (here asyncHandler). \
+then write a function using the middleware and write the logic for the file (for eg: registering a user.)
+
+
+
+### how to write routes
+
+go to the routes folder and create a file. \
+then import the corresponding controller function u want to use. \
+then import Router and like express we write app = express(), here we write router = Router() \
+then using router we write router.route(route name).method name( controller function name ) \
+then at the end we export default router. \
+then finally in the app.js section we first import the routes and then using middleware we write the specific url where we want to execute the 
+function. \
+app.use("route", routername)
+
+### using the multer middleware
+
+in the routes folder, while posting to a route we first use the middleware. Using the middleware we can take multiple fields and set their name and
+maximum count. \
+as express gives us the access of req.body similarly multer as middleware gives us the access of req.files.
+
 
 
 
