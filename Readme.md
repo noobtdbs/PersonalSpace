@@ -25,8 +25,8 @@ then to allow all types of encoded urls we use app.use(express.urlencoded({exten
 to save any files we want in the server itself we use app.use(express.static("public")) \
 to read and modify the data present in the cookies in the client we use the cookie-parser middleware app.use(cookieParser())
 
--[MiddleWare Concept]![alt text](public/temp/image.png)
--[Status Codes]![alt text](public/temp/image-1.png)
+-[MiddleWare Concept]![alt text](public/images/image.png)
+-[Status Codes]![alt text](public/images/image-1.png)
 
 ### Why we use Middlewares?
 
@@ -93,6 +93,9 @@ in the routes folder, while posting to a route we first use the middleware. Usin
 maximum count. \
 as express gives us the access of req.body similarly multer as middleware gives us the access of req.files.
 
+
+One good thing about clodinary is if anything is not passed through cloudinary function.upload method it autometically considers it as empty string.
+For example, if coverimage is not there while registering, cloudinary autometically sets it as empty string so that no error will occur.
 
 
 
