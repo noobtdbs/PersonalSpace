@@ -140,6 +140,42 @@ Now while accessing the token via req.cookies we need to enter the tokenName we 
 jwt.verify method takes two paramters -> a. token and b.tokenString and it returns the decoded token.
 
 
+## Access Token vs Refresh Token
+
+### Access Token
+- **Purpose:** Used to authenticate API requests on behalf of the user.
+- **Lifetime:** Short-lived, typically expires after a few minutes to an hour.
+- **Security:** Highly sensitive and should be kept confidential. If exposed, it can be used to access the protected resources until it expires.
+- **Usage:** Sent in the `Authorization` header of API requests as a Bearer token to access protected resources.
+- **Renewal:** Requires the user to re-authenticate or use a refresh token to obtain a new access token.
+- **Use Cases:**
+  - **Single-Page Applications (SPA):** SPAs often use access tokens to authenticate API calls, allowing users to interact with the app seamlessly.
+  - **Mobile Applications:** Access tokens enable secure communication with backend services.
+- **Common Mistakes:**
+  - **Storing in Local Storage:** Storing access tokens in local storage is insecure as they can be accessed by malicious scripts.
+  - **Using Long-Lived Access Tokens:** This increases the risk window if the token is compromised.
+
+### Refresh Token
+- **Purpose:** Used to obtain a new access token without requiring the user to re-authenticate.
+- **Lifetime:** Long-lived, often lasts days or months.
+- **Security:** Sensitive and should be securely stored. If compromised, it can be used to generate new access tokens.
+- **Usage:** Sent to the authentication server to request a new access token when the current one expires.
+- **Scope:** Generally, refresh tokens are used solely for obtaining new access tokens and do not provide direct access to protected resources.
+- **Use Cases:**
+  - **Long Sessions:** Ideal for maintaining long-lived sessions without requiring users to log in frequently, such as in web applications or mobile apps.
+  - **Background Processes:** Useful in scenarios where a background service needs to authenticate periodically without user interaction.
+- **Common Mistakes:**
+  - **Storing in Insecure Places:** Refresh tokens should not be stored in insecure places like local storage or as cookies unless they are `HttpOnly` and `Secure`.
+  - **Not Revoking on Logout:** Failing to revoke refresh tokens on logout can lead to unauthorized access if a token is later compromised.
+
+### Best Practices
+- **Token Storage:** Store tokens in secure, http-only cookies when possible to protect against XSS attacks.
+- **Token Expiry:** Implement short expiration times for access tokens and use refresh tokens to minimize risks.
+- **Revoke Tokens on Logout:** Ensure that both access and refresh tokens are revoked when the user logs out to prevent unauthorized access.
+
+
+
+
 
 
 
