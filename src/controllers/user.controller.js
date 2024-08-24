@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 
 
 const generateAccessAndRefreshToken = async(userId)=>{
@@ -84,7 +85,7 @@ const loginUser = asyncHandler(async(req, res)=>{
 
     if(!user)throw new ApiError(404, "User is not registered!")
 
-    const isPasswordValid = await user.isPasswrodCorrect(password)
+    const isPasswordValid = await user.isPasswordCorrect(password)
     if(!isPasswordValid)throw new ApiError(401, "Invalid user credentials ! ")
     
     const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
@@ -221,43 +222,64 @@ const updateAccountDetails = asyncHandler(async(req, res)=>{
     .json(new ApiResponse(user, "User data updated Successfully !", 200))
 })
 
-const updateUserAvatar = asyncHandler(async(req, res)=>{
-    const avatarLocalPath = req.file?.path
-    if(!avatarLocalPath)throw new ApiError(400, "Avatar File is missing!!")
+const deleteFile = (filePath, retries = 3) => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            if (retries > 0) {
+                console.error(`Retrying deletion of file: ${filePath}. Retries left: ${retries}`, err);
+                return deleteFile(filePath, retries - 1);
+            } else {
+                console.error(`Failed to delete file after multiple attempts: ${filePath}`, err);
+                // Optionally, queue the file for later deletion
+                queueFileForDeletion(filePath);
+            }
+        } else {
+            console.log(`Successfully deleted local file: ${filePath}`);
+        }
+    });
+};
 
-    const avatar = uploadOnCloudinary(avatarLocalPath)
+const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalPath = req.file?.path;
+    if (!avatarLocalPath) throw new ApiError(400, "Avatar File is missing!!");
 
-    if(!avatar.url)throw new ApiError(400, "Error while fetching url from cloudinary!!")
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-    const user = await user.findByIdAndUpdate(
+    if (!avatar.url) throw new ApiError(400, "Error while fetching URL from Cloudinary!!");
+
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
-        {$set:{avatar:avatar.url}},
-        {new:true}
-    ).select("-password")
+        { $set: { avatar: avatar.url } },
+        { new: true }
+    ).select("-password");
+
+    // Delete the local file after successful database update
+    deleteFile(avatarLocalPath);
 
     return res.status(200)
-    .json(new ApiResponse(user, "Avatar file updated Successfully!!", 200))
+        .json(new ApiResponse(user, "Avatar updated successfully!", 200));
+});
 
-})
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+    const coverImageLocalPath = req.file?.path;
+    if (!coverImageLocalPath) throw new ApiError(400, "Cover Image file is missing!!");
 
-const updateUserCoverImage = asyncHandler(async(req, res)=>{
-    const coverImageLocalPath = req.file?.path
-    if(!coverImageLocalPath)throw new ApiError(400, "coverImage File is missing!!")
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-    const coverImage = uploadOnCloudinary(coverImageLocalPath)
+    if (!coverImage.url) throw new ApiError(400, "Error while fetching URL from Cloudinary!!");
 
-    if(!coverImage.url)throw new ApiError(400, "Error while fetching url from cloudinary!!")
-
-    const user = await user.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
-        {$set:{coverImage:coverImage.url}},
-        {new:true}
-    ).select("-password")
+        { $set: { coverImage: coverImage.url } },
+        { new: true }
+    ).select("-password");
+
+    // Delete the local file after successful database update
+    deleteFile(coverImageLocalPath);
 
     return res.status(200)
-    .json(new ApiResponse(user, "coverImage file updated Successfully!!", 200))
-    
-})
+        .json(new ApiResponse(user, "Cover Image updated successfully!", 200));
+});
 
 const getUserChannelProfile = asyncHandler(async(req, res)=>{
     const {username} = req.params
